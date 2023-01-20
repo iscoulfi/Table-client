@@ -19,6 +19,7 @@ export const registerUser = createAsyncThunk(
       });
       if (data.token) {
         window.localStorage.setItem('token', data.token);
+        window.localStorage.setItem('id', data.newUser._id);
       }
       return data;
     } catch (error) {
@@ -35,8 +36,10 @@ export const loginUser = createAsyncThunk(
         username,
         password,
       });
+
       if (data.token) {
         window.localStorage.setItem('token', data.token);
+        window.localStorage.setItem('id', data.user._id);
       }
       return data;
     } catch (error) {
@@ -45,7 +48,7 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-export const getMe = createAsyncThunk('auth/loginUser', async () => {
+export const getMe = createAsyncThunk('auth/getMe', async () => {
   try {
     const { data } = await axios.get('/auth/me');
 
