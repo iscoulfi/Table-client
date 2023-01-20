@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { checkIsAuth, loginUser } from '../redux/slices/authSlice';
+import {
+  checkIsAuth,
+  getLoginTime,
+  loginUser,
+} from '../redux/slices/authSlice';
 
 const Login = () => {
   const [data, setData] = useState({ username: '', password: '' });
@@ -16,6 +20,8 @@ const Login = () => {
   function handleFormSubmit(event) {
     event.preventDefault();
     try {
+      let date = Date();
+      dispatch(getLoginTime({ ...data, date }));
       dispatch(loginUser({ ...data }));
       setData({ username: '', password: '' });
     } catch (e) {

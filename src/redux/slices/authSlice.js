@@ -58,6 +58,21 @@ export const getMe = createAsyncThunk('auth/getMe', async () => {
   }
 });
 
+export const getLoginTime = createAsyncThunk(
+  'auth/getLoginTime',
+  async ({ username, date }) => {
+    try {
+      const { data } = await axios.put(`/auth/${username}`, {
+        loginTime: date,
+      });
+
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -116,6 +131,11 @@ export const authSlice = createSlice({
       state.status = action.payload.message;
       state.isLoading = false;
     },
+    [getLoginTime.pending]: () => {},
+    [getLoginTime.fulfilled]: (state, action) => {
+      state.user = action.payload.user;
+    },
+    [getLoginTime.rejected]: () => {},
   },
 });
 
