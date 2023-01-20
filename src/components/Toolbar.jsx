@@ -2,13 +2,13 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { AiFillDelete } from 'react-icons/ai';
 
-function BasicExample({ cleaner, block, unblock }) {
+function BasicExample({ cleaner, block }) {
   return (
     <ButtonGroup aria-label="Basic example" className="mb-2">
-      <Button variant="danger" onClick={block}>
+      <Button variant="danger" onClick={() => block('blocked')}>
         Block
       </Button>
-      <Button variant="success" onClick={unblock}>
+      <Button variant="success" onClick={() => block('available')}>
         Unblock
       </Button>
       <Button variant="secondary" onClick={cleaner}>

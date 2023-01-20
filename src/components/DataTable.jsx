@@ -1,33 +1,37 @@
 import { useEffect, useState } from 'react';
-import Table from 'react-bootstrap/Table';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkIsAuth, logout, blockUser } from '../redux/slices/authSlice';
-import Toolbar from './Toolbar';
-import { getAll, removeUser } from '../redux/slices/tableSlice';
-import TableRow from './TableRow';
+import {
+  blocker,
+  getAll,
+  refresh,
+  removeUser,
+} from '../redux/slices/tableSlice';
 import { useNavigate } from 'react-router-dom';
+import Table from 'react-bootstrap/Table';
+import TableRow from './TableRow';
+import Toolbar from './Toolbar';
 
 const DataTable = () => {
   const [toggleUsers, setToggleUsers] = useState([]);
   const [check, setCheck] = useState([]);
+  const [checkedMain, setCheckedMain] = useState(false);
 
   const navigate = useNavigate();
-
-  const isAuth = useSelector(checkIsAuth);
-
   const dispatch = useDispatch();
 
+  const isAuth = useSelector(checkIsAuth);
   const all = useSelector(state => state.table.all);
 
   useEffect(() => {
     let a = all.map(el => {
       return { select: false, ...el };
     });
-
     setCheck(a);
   }, [all]);
 
   const toggleUser = (id, e, el) => {
+    setCheckedMain(false);
     toggleUsers.includes(id)
       ? setToggleUsers(toggleUsers.filter(el => el !== id))
       : setToggleUsers([...toggleUsers, id]);
@@ -43,12 +47,12 @@ const DataTable = () => {
   };
 
   const handleChange = e => {
+    checkedMain ? setCheckedMain(false) : setCheckedMain(true);
     let tempUser = all.map(user => {
       const { _id } = user;
       return _id;
     });
     e.target.checked ? setToggleUsers(tempUser) : setToggleUsers([]);
-
     setCheck(
       check.map(d => {
         d.select = e.target.checked;
@@ -58,49 +62,49 @@ const DataTable = () => {
   };
 
   function cleaner() {
-    toggleUsers.map(id => {
+    toggleUsers.forEach(id => {
       dispatch(removeUser(id));
-      id === window.localStorage.id && dispatch(logout());
-      return null;
+      id === window.localStorage.id && dispatch(logout()) && navigate('/');
+      dispatch(refresh(id));
     });
-    // setCheck(check.filter(user => user.select !== true));
-    navigate('/');
+    setToggleUsers([]);
   }
 
-  const block = () => {
-    let s = 'blocked';
-    let uname;
-    toggleUsers.map(id => {
-      uname = check.find(el => el._id === id).username;
-      dispatch(blockUser({ uname, s }));
-      id === window.localStorage.id &&
-        dispatch(logout()) &&
-        window.localStorage.removeItem('token');
-      return null;
-    });
+  const logoutUser = () => {
+    dispatch(logout());
+    window.localStorage.removeItem('token');
     navigate('/');
   };
 
-  const unblock = () => {
-    let s = 'available';
-    let uname;
-    toggleUsers.map(id => {
-      uname = check.find(el => el._id === id).username;
-      dispatch(blockUser({ uname, s }));
-      return null;
+  const checkCurrentUser = id => {
+    id === window.localStorage.id && logoutUser();
+  };
+
+  (() => {
+    let status = 'available',
+      id = window.localStorage.id,
+      a = all.find(el => el._id === id);
+    a &&
+      a.statusUser === 'blocked' &&
+      dispatch(blocker({ id, status })) &&
+      logoutUser();
+  })();
+
+  const block = status => {
+    toggleUsers.forEach(id => {
+      let uname = check.find(el => el._id === id).username;
+      dispatch(blockUser({ uname, status }));
+      dispatch(blocker({ id, status }));
+      status === 'blocked' && checkCurrentUser(id);
     });
-    navigate('/');
+    setToggleUsers([]);
+    check.map(el => (el.select = false));
+    setCheckedMain(false);
   };
 
   useEffect(() => {
     dispatch(getAll());
   }, [dispatch]);
-
-  const a = all.find(el => el._id === window.localStorage.id);
-  a &&
-    a.statusUser === 'blocked' &&
-    dispatch(logout()) &&
-    window.localStorage.removeItem('token');
 
   return (
     <>
@@ -108,7 +112,7 @@ const DataTable = () => {
         <>
           <h2 className="fw-bold mt-5 text-center">Users</h2>
           <div className="text-center">
-            <Toolbar cleaner={cleaner} block={block} unblock={unblock} />
+            <Toolbar cleaner={cleaner} block={block} />
           </div>
 
           <Table striped responsive bordered hover variant="dark">
@@ -122,6 +126,7 @@ const DataTable = () => {
                       value=""
                       id="flexCheckDefault"
                       name="allSelect"
+                      checked={checkedMain}
                       onChange={handleChange}
                     />
                   </div>

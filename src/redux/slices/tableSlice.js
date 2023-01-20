@@ -26,7 +26,15 @@ export const removeUser = createAsyncThunk('table/removeUser', async id => {
 export const tableSlice = createSlice({
   name: 'table',
   initialState,
-  reducers: {},
+  reducers: {
+    refresh: (state, action) => {
+      state.all = state.all.filter(user => user._id !== action.payload);
+    },
+    blocker: (state, action) => {
+      state.all.find(el => el._id === action.payload.id).statusUser =
+        action.payload.status;
+    },
+  },
   extraReducers: {
     [getAll.pending]: () => {},
     [getAll.fulfilled]: (state, action) => {
@@ -41,4 +49,5 @@ export const tableSlice = createSlice({
   },
 });
 
+export const { refresh, blocker } = tableSlice.actions;
 export default tableSlice.reducer;
