@@ -36,6 +36,9 @@ export const loginUser = createAsyncThunk(
         username,
         password,
       });
+      if (data.user.statusUser === 'blocked') {
+        throw new Error('You are blocked');
+      }
 
       if (data.token) {
         window.localStorage.setItem('token', data.token);
@@ -66,6 +69,22 @@ export const getLoginTime = createAsyncThunk(
         loginTime: date,
       });
 
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+export const blockUser = createAsyncThunk(
+  'table/blockUser',
+  async ({ uname, s }) => {
+    try {
+      console.log(uname, s);
+      const { data } = await axios.put(`/auth/${uname}`, {
+        statusUser: s,
+      });
+      console.log(data);
       return data;
     } catch (error) {
       console.log(error);
@@ -116,7 +135,7 @@ export const authSlice = createSlice({
       state.status = action.payload.message;
       state.isLoading = false;
     },
-    // Проверка авторизации
+    // check auth
     [getMe.pending]: state => {
       state.isLoading = true;
       state.status = null;
@@ -131,6 +150,7 @@ export const authSlice = createSlice({
       state.status = action.payload.message;
       state.isLoading = false;
     },
+    //login time
     [getLoginTime.pending]: () => {},
     [getLoginTime.fulfilled]: (state, action) => {
       state.user = action.payload.user;

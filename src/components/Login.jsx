@@ -19,6 +19,7 @@ const Login = () => {
 
   function handleFormSubmit(event) {
     event.preventDefault();
+
     try {
       let date = Date();
       dispatch(getLoginTime({ ...data, date }));

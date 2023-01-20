@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import { useDispatch, useSelector } from 'react-redux';
-import { checkIsAuth, logout } from '../redux/slices/authSlice';
+import { checkIsAuth, logout, blockUser } from '../redux/slices/authSlice';
 import Toolbar from './Toolbar';
 import { getAll, removeUser } from '../redux/slices/tableSlice';
 import TableRow from './TableRow';
@@ -66,17 +66,49 @@ const DataTable = () => {
     // setCheck(check.filter(user => user.select !== true));
     navigate('/');
   }
-  console.log(check);
+
+  const block = () => {
+    let s = 'blocked';
+    let uname;
+    toggleUsers.map(id => {
+      uname = check.find(el => el._id === id).username;
+      dispatch(blockUser({ uname, s }));
+      id === window.localStorage.id &&
+        dispatch(logout()) &&
+        window.localStorage.removeItem('token');
+      return null;
+    });
+    navigate('/');
+  };
+
+  const unblock = () => {
+    let s = 'available';
+    let uname;
+    toggleUsers.map(id => {
+      uname = check.find(el => el._id === id).username;
+      dispatch(blockUser({ uname, s }));
+      return null;
+    });
+    navigate('/');
+  };
+
   useEffect(() => {
     dispatch(getAll());
   }, [dispatch]);
+
+  const a = all.find(el => el._id === window.localStorage.id);
+  a &&
+    a.statusUser === 'blocked' &&
+    dispatch(logout()) &&
+    window.localStorage.removeItem('token');
+
   return (
     <>
       {isAuth && (
         <>
           <h2 className="fw-bold mt-5 text-center">Users</h2>
           <div className="text-center">
-            <Toolbar cleaner={cleaner} />
+            <Toolbar cleaner={cleaner} block={block} unblock={unblock} />
           </div>
 
           <Table striped responsive bordered hover variant="dark">
