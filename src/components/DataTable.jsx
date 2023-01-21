@@ -31,6 +31,7 @@ const DataTable = () => {
   }, [all]);
 
   const toggleUser = (id, e, el) => {
+    checkRemoteUser();
     setCheckedMain(false);
     toggleUsers.includes(id)
       ? setToggleUsers(toggleUsers.filter(el => el !== id))
@@ -47,6 +48,7 @@ const DataTable = () => {
   };
 
   const handleChange = e => {
+    checkRemoteUser();
     checkedMain ? setCheckedMain(false) : setCheckedMain(true);
     let tempUser = all.map(user => {
       const { _id } = user;
@@ -62,6 +64,7 @@ const DataTable = () => {
   };
 
   function cleaner() {
+    checkRemoteUser();
     toggleUsers.forEach(id => {
       dispatch(removeUser(id));
       id === window.localStorage.id && dispatch(logout()) && navigate('/');
@@ -80,17 +83,14 @@ const DataTable = () => {
     id === window.localStorage.id && logoutUser();
   };
 
-  (() => {
-    let status = 'available',
-      id = window.localStorage.id,
+  const checkRemoteUser = () => {
+    let id = window.localStorage.id,
       a = all.find(el => el._id === id);
-    a &&
-      a.statusUser === 'blocked' &&
-      dispatch(blocker({ id, status })) &&
-      logoutUser();
-  })();
+    a && a.statusUser === 'blocked' && logoutUser();
+  };
 
   const block = status => {
+    checkRemoteUser();
     toggleUsers.forEach(id => {
       let uname = check.find(el => el._id === id).username;
       dispatch(blockUser({ uname, status }));
