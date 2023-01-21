@@ -1,17 +1,25 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { checkIsAuth, registerUser } from '../redux/slices/authSlice';
+import {
+  checkIsAuth,
+  reduceStatus,
+  registerUser,
+} from '../redux/slices/authSlice';
+import { toast } from 'react-toastify';
 
 const Auth = () => {
   const [data, setData] = useState({ username: '', email: '', password: '' });
   const dispatch = useDispatch();
   const isAuth = useSelector(checkIsAuth);
   const navigate = useNavigate();
+  const { status } = useSelector(state => state.auth);
 
   useEffect(() => {
+    if (status) toast(status);
     if (isAuth) navigate('/table');
-  }, [isAuth, navigate]);
+    dispatch(reduceStatus());
+  }, [isAuth, navigate, status, dispatch]);
 
   function handleFormSubmit(event) {
     event.preventDefault();

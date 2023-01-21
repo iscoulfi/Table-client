@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 import {
   checkIsAuth,
   getLoginTime,
   loginUser,
+  reduceStatus,
 } from '../redux/slices/authSlice';
 
 const Login = () => {
@@ -12,10 +14,13 @@ const Login = () => {
   const dispatch = useDispatch();
   const isAuth = useSelector(checkIsAuth);
   const navigate = useNavigate();
+  const { status } = useSelector(state => state.auth);
 
   useEffect(() => {
+    if (status) toast(status);
     if (isAuth) navigate('/table');
-  }, [isAuth, navigate]);
+    dispatch(reduceStatus());
+  }, [isAuth, navigate, status, dispatch]);
 
   function handleFormSubmit(event) {
     event.preventDefault();

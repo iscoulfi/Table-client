@@ -37,14 +37,15 @@ export const loginUser = createAsyncThunk(
         username,
         password,
       });
-      if (data.user.statusUser === 'blocked') {
-        throw new Error('You are blocked');
+      if (data.user && data.user.statusUser === 'blocked') {
+        return { message: 'You are blocked.' };
       }
+
       if (data.token) {
         window.localStorage.setItem('token', data.token);
         window.localStorage.setItem('id', data.user._id);
       }
-
+      console.log(data);
       return data;
     } catch (error) {
       console.log(error);
@@ -100,6 +101,9 @@ export const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isLoading = false;
+      state.status = null;
+    },
+    reduceStatus: state => {
       state.status = null;
     },
   },
@@ -166,5 +170,5 @@ export const authSlice = createSlice({
 });
 
 export const checkIsAuth = state => Boolean(state.auth.token);
-export const { logout } = authSlice.actions;
+export const { logout, reduceStatus } = authSlice.actions;
 export default authSlice.reducer;

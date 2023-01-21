@@ -6,6 +6,8 @@ import NotFound from './components/NotFound';
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 import { getMe } from './redux/slices/authSlice';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const dispatch = useDispatch();
@@ -23,6 +25,7 @@ function App() {
           <Route path="table" element={<DataTable />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <ToastContainer />
       </div>
     </BrowserRouter>
   );
